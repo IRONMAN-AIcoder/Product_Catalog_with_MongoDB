@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Product Catalog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #28a745; /* Green for signup */
+            --primary-hover: #218838;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --error-color: #dc3545;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .form-container { background-color: var(--card-background); padding: 2.5rem 3rem; border-radius: 12px; box-shadow: var(--shadow); width: 100%; max-width: 400px; text-align: center; }
+        .form-container h1 { font-size: 2rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .form-container p { color: var(--light-text-color); margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        .input-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+        .input-group input { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; transition: all 0.2s ease; }
+        .input-group input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25); }
+        .btn-submit { width: 100%; padding: 0.85rem 1rem; border: none; border-radius: 8px; background-color: var(--primary-color); color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; }
+        .btn-submit:hover { background-color: var(--primary-hover); }
+        .message { margin-top: 1rem; height: 1.2rem; font-weight: 500; }
+        .error-message { color: var(--error-color); }
+        .success-message { color: var(--primary-color); }
+        .switch-form { margin-top: 1.5rem; font-size: 0.9rem; }
+        .switch-form a { color: #007bff; text-decoration: none; font-weight: 500; }
+        .switch-form a:hover { text-decoration: underline; }
+        .role-selector { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+        .role-selector label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create an Account</h1>
+        <p>Get started with our product catalog.</p>
+        
+        <form id="signupForm">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="input-group role-selector">
+                <label><input type="radio" name="role" value="user" checked> Sign up as User</label>
+                <label><input type="radio" name="role" value="admin"> Sign up as Admin</label>
+            </div>
+            <div class="input-group" id="adminKeyGroup" style="display: none;">
+                <label for="adminKey">Admin Secret Key</label>
+                <input type="password" id="adminKey" name="adminKey">
+            </div>
+
+            <button type="submit" class="btn-submit">Sign Up</button>
+            <p id="message" class="message"></p>
+        </form>
+        <div class="switch-form">
+            Already have an account? <a href="./login.html">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const message = document.getElementById('message');
+        const adminKeyGroup = document.getElementById('adminKeyGroup');
+        const roleInputs = document.querySelectorAll('input[name="role"]');
+
+        roleInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                if (e.target.value === 'admin') {
+                    adminKeyGroup.style.display = 'block';
+                } else {
+                    adminKeyGroup.style.display = 'none';
+                }
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            message.textContent = '';
+            message.className = 'message';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            const API_BASE_URL = 'https://product-catalog-gnut.onrender.com';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    message.textContent = 'Signup successful! Redirecting to login...';
+                    message.classList.add('success-message');
+                    setTimeout(() => { window.location.href = './login.html'; }, 2000);
+                } else {
+                    message.textContent = result.message || 'Signup failed. Please try again.';
+                    message.classList.add('error-message');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                message.textContent = 'An error occurred. Please try again later.';
+                message.classList.add('error-message');
+            }
+        });
+    </script>
+</body>
+</html>
